@@ -1,57 +1,32 @@
-export function validateCpf(str: string) {
-  if (str !== null) {
-    if (str !== undefined) {
-      if (str.length >= 11 && str.length <= 14) {
-        // cleaning cpf
-        str = str
-          .replace(".", "")
-          .replace(".", "")
-          .replace("-", "")
-          .replace(" ", "");
-        // tudo igual
-        if (!str.split("").every((c) => c === str[0])) {
-          try {
-            let d1, d2;
-            let dg1, dg2, rest;
-            let digito;
-            let nDigResult;
-            d1 = d2 = 0;
-            dg1 = dg2 = rest = 0;
+const VALID_LENGTH = 11;
 
-            for (let nCount = 1; nCount < str.length - 1; nCount++) {
-              // if (isNaN(parseInt(str.substring(nCount -1, nCount)))) {
-              // 	return false;
-              // } else {
+export function validateCpf(cpf: string) {
+  if (!cpf) return false;
+  cpf = clean(cpf);
+  if (cpf.length != VALID_LENGTH) return false;
+  if (allDigitsTheSame(cpf)) return false;
+  const dg1 = calculateDigit(cpf, 10);
+  const dg2 = calculateDigit(cpf, 11);
+  return extractCheckDigit(cpf) == `${dg1}${dg2}`;
+}
 
-              digito = parseInt(str.substring(nCount - 1, nCount));
-              d1 = d1 + (11 - nCount) * digito;
+function clean(cpf: string) {
+  return cpf.replace(/\D/g, "");
+}
 
-              d2 = d2 + (12 - nCount) * digito;
-              // }
-            }
+function allDigitsTheSame(cpf: string) {
+  return cpf.split("").every((c) => c === cpf[0]);
+}
 
-            rest = d1 % 11;
+function calculateDigit(cpf: string, fator: number) {
+  let total = 0;
+  for (const digit of cpf) {
+    if (fator > 1) total += parseInt(digit) * fator--;
+  }
+  const rest = total % 11;
+  return (rest < 2) ? 0 : 11 - rest;
+}
 
-            // se for menor que 2 é 0, senão é 11 menos o resto
-            dg1 = rest < 2 ? (dg1 = 0) : 11 - rest;
-            d2 += 2 * dg1;
-            rest = d2 % 11;
-            if (rest < 2) dg2 = 0;
-            else dg2 = 11 - rest;
-
-            let nDigVerific = str.substring(str.length - 2, str.length);
-            nDigResult = "" + dg1 + "" + dg2;
-
-            return nDigVerific == nDigResult;
-
-            // se der problema...
-          } catch (e) {
-            console.error("Erro !" + e);
-
-            return false;
-          }
-        } else return false;
-      } else return false;
-    } else return false;
-  } else return false;
+function extractCheckDigit(cpf: string) {
+  return cpf.slice(9);
 }
