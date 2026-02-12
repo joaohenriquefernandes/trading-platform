@@ -7,7 +7,9 @@
     "docker:run": "docker run -it -v $(pwd)/.:/app cccat22_backend bash",
     "compose:up": "docker compose -f docker/docker-compose.yml up -d --build",
     "compose:down": "docker compose -f docker/docker-compose.yml -v down",
-    "compose:exec": "docker compose -f docker/docker-compose.yml exec -it backend bash"
+    "compose:exec": "docker compose -f docker/docker-compose.yml exec -it backend bash",
+    "typecheck": "tsc --noEmit",
+    "ci:tests": "npx jest"
   },
   "keywords": [],
   "author": "",
