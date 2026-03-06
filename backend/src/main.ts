@@ -5,9 +5,11 @@ import { validateCpf } from './validateCpf';
 import { validatePassword } from './validatePassword';
 import { validateEmail } from './validateEmail';
 import { validateName } from './validateName';
+import cors from 'cors';
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 const connection = pgp()('postgres://postgres:123456@db:5432/app');
 
