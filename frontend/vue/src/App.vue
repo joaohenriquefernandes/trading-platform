@@ -1,53 +1,67 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { inject, ref } from "vue";
+import { type AccountGateway } from "./AccountGateway";
 
-  const form = ref({
-    name: '',
-    email: '',
-    document: '',
-    password: '',
-    accountId: '',
-    message: ''
-  });
+const form = ref({
+  name: "",
+  email: "",
+  document: "",
+  password: "",
+  accountId: "",
+  message: "",
+});
+const accountGateway = inject("accountGateway") as AccountGateway;
 
-  async function signup() {
-    const input = form.value;
-    const response = await fetch('http://localhost:3000/signup', {
-      method: 'post',
-      headers: {
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify(input)
-    });
-    const output = await response.json();
-    if (output.accountId) {
-      form.value.accountId = output.accountId;
-      form.value.message = 'success'
-    } else {
-      form.value.message = output.message;
-    }
+async function signup() {
+  const input = form.value;
+  const output = await accountGateway.save(input);
+  if (output.accountId) {
+    form.value.accountId = output.accountId;
+    form.value.message = "success";
+  } else {
+    form.value.message = output.message;
   }
+}
 </script>
 
 <template>
   <div>
     <div>
-      <input class="input-name" type="text" v-model="form.name" placeholder="Name">
+      <input
+        class="input-name"
+        type="text"
+        v-model="form.name"
+        placeholder="Name"
+      />
     </div>
     <div>
-      <input class="input-email" type="text" v-model="form.email" placeholder="Email">
+      <input
+        class="input-email"
+        type="text"
+        v-model="form.email"
+        placeholder="Email"
+      />
     </div>
     <div>
-      <input class="input-document" type="text" v-model="form.document" placeholder="Document">
+      <input
+        class="input-document"
+        type="text"
+        v-model="form.document"
+        placeholder="Document"
+      />
     </div>
     <div>
-      <input class="input-password" type="text" v-model="form.password" placeholder="Password">
+      <input
+        class="input-password"
+        type="text"
+        v-model="form.password"
+        placeholder="Password"
+      />
     </div>
     <button @click="signup()" class="button-signup">Signup</button>
-    <span class="span-account-id">{{form.accountId}}</span>
-    <span class="span-message">{{form.message}}</span>
+    <span class="span-account-id">{{ form.accountId }}</span>
+    <span class="span-message">{{ form.message }}</span>
   </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

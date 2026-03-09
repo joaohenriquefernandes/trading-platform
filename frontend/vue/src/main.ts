@@ -1,4 +1,7 @@
-import { createApp } from 'vue'
-import App from './App.vue'
+import { createApp } from "vue";
+import { AccountGatewayHttp } from "./AccountGateway";
+import App from "./App.vue";
 
-createApp(App).mount('#app')
+const app = createApp(App);
+app.provide("accountGateway", new AccountGatewayHttp());
+app.mount("#app");
