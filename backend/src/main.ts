@@ -1,53 +1,23 @@
-import express, { Request, Response } from 'express';
-import { randomUUID } from 'node:crypto';
-import pgp from 'pg-promise';
-import { validateCpf } from './validateCpf';
-import { validatePassword } from './validatePassword';
-import { validateEmail } from './validateEmail';
-import { validateName } from './validateName';
-import cors from 'cors';
+import { randomUUID } from "node:crypto";
+import { getAccountById, saveAccount } from "./data";
+import { validateCpf } from "./validateCpf";
+import { validateEmail } from "./validateEmail";
+import { validateName } from "./validateName";
+import { validatePassword } from "./validatePassword";
 
-const app = express();
-app.use(express.json());
-app.use(cors());
+export async function signup(account: any) {
+  account.accountId = randomUUID();
+  if (!validateName(account.name)) throw new Error("Invalid name");
+  if (!validateEmail(account.email)) throw new Error("Invalid email");
+  if (!validateCpf(account.document)) throw new Error("Invalid document");
+  if (!validatePassword(account.password)) throw new Error("Invalid password");
+  await saveAccount(account);
+  return {
+    accountId: account.accountId,
+  };
+}
 
-const connection = pgp()('postgres://postgres:123456@db:5432/app');
-
-app.post('/signup', async (request: Request, response: Response) => {
-  const accountId = randomUUID();
-  const account = request.body;
-  if (!validateName(account.name)) {
-    response.status(422).json({
-      message: 'Invalid name'
-    });
-    return;
-  }
-  if (!validateEmail(account.email)) {
-    response.status(422).json({
-      message: 'Invalid email'
-    });
-    return;
-  }
-  if (!validateCpf(account.document)) {
-    response.status(422).json({
-      message: 'Invalid document'
-    });
-    return;
-  }
-  if (!validatePassword(account.password)) {
-    response.status(422).json({
-      message: 'Invalid password'
-    });
-    return;
-  }
-  await connection.query('insert into ccca.account (account_id, name, email, document, password) values ($1, $2, $3, $4, $5)', [accountId, account.name, account.email, account.document, account.password]);
-  response.json({
-    accountId
-  });
-});
-app.get('/accounts/:accountId', async (request: Request, response: Response) => {
-  const accountId = request.params.accountId;
-  const [account] = await connection.query('select * from ccca.account', []);
-  response.json(account);
-});
-app.listen(3000);
+export async function getAccount(accountId: string) {
+  const account = await getAccountById(accountId);
+  return account;
+}
