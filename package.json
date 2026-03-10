@@ -8,6 +8,8 @@
     "compose:up": "docker compose -f docker/docker-compose.yml up -d --build",
     "compose:down": "docker compose -f docker/docker-compose.yml -v down",
     "compose:exec": "docker compose -f docker/docker-compose.yml exec -it backend bash",
+    "compose:db:down": "docker compose -f docker/docker-compose.yml -v down db",
+    "compose:db:up": "docker compose -f docker/docker-compose.yml up db -d",
     "typecheck": "tsc --noEmit",
     "ci:tests": "npx jest"
   },
