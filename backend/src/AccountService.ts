@@ -1,11 +1,19 @@
 import { randomUUID } from "node:crypto";
+import { AccountAssetDAO } from "./AccountAssetDAO";
 import { AccountDAO } from "./AccountDAO";
+import { inject } from "./Registry";
 import { validateCpf } from "./validateCpf";
 import { validateEmail } from "./validateEmail";
 import { validateName } from "./validateName";
 import { validatePassword } from "./validatePassword";
 export class AccountService {
-  constructor(private readonly accountDAO: AccountDAO) {}
+  @inject("accountDAO")
+  accountDAO!: AccountDAO;
+
+  @inject("accountAssetDAO")
+  accountAssetDAO!: AccountAssetDAO;
+
+  constructor() {}
 
   async signup(account: any) {
     account.accountId = randomUUID();
@@ -22,6 +30,28 @@ export class AccountService {
 
   async getAccount(accountId: string) {
     const account = await this.accountDAO.getById(accountId);
+    if (!account) throw new Error("Account not found");
+    account.balances = await this.accountAssetDAO.getByAccountId(accountId);
     return account;
+  }
+
+  async deposit(accountAsset: any) {
+    const account = await this.accountDAO.getById(accountAsset.accountId);
+    if (!account) throw new Error("Account not found");
+    await this.accountAssetDAO.save(accountAsset);
+  }
+
+  async withdraw(accountAsset: any) {
+    const account = await this.getAccount(accountAsset.accountId);
+    const balance = account.balances.find(
+      (balance: any) => balance.asset_id === accountAsset.assetId,
+    );
+    const quantity = parseFloat(balance.quantity) - accountAsset.quantity;
+    if (quantity < 0) throw new Error("Insuficient funds");
+    await this.accountAssetDAO.update({
+      accountId: accountAsset.accountId,
+      assetId: accountAsset.assetId,
+      quantity,
+    });
   }
 }
